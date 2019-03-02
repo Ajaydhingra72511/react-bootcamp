@@ -1,0 +1,39 @@
+import React from 'react';
+
+import { fetchEmails } from '../actions';
+
+const { Provider, Consumer } = React.createContext();
+
+class EmailsProvider extends React.Component {
+ state = {
+    fetchIntervalMounted: false,
+  };
+
+  mountFetchInterval = async fetchEmails => {
+    await this.setState(state => ({
+      fetchIntervalMounted: !state.fetchIntervalMounted,
+    }));
+
+    await fetchEmails();
+
+    this.fetchEmailInterval = setInterval(async function() {
+      await fetchEmails();
+    }, 5000);
+  };
+
+  render() {
+    return (
+      <Provider
+        value={{
+          state: { fetchIntervalMounted: this.state },
+          actions: {
+            mountFetchInterval: this.mountFetchInterval,
+          }
+        }}>
+        {this.props.children}
+      </Provider>
+    );
+  }
+}
+
+export { EmailsProvider, Consumer as EmailsConsumer };
